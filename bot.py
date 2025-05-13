@@ -20,7 +20,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 time_frame_blabla = 10  # minutes
 ban_log = defaultdict(list)
 banned_users_by_banner = defaultdict(list)
-BAN_THRESHOLD = 10  # Number of bans within the time frame to trigger the action
+BAN_THRESHOLD = 5  # Number of bans within the time frame to trigger the action
 TIME_WINDOW = timedelta(minutes=time_frame_blabla)
 
 ALLOWED_SERVER = int(os.getenv("ALLOWED_SERVER"))
@@ -56,6 +56,7 @@ async def on_message(message):
                 await message.channel.send(f"⚠️ An error occurred: {e}")
 
         # DELETE messages with a specific word
+        """
         elif content.lower().startswith("delete words "):
             print(f"Received DM from {message.author}: {message.content} 'delete words'")
             try:
@@ -91,10 +92,12 @@ async def on_message(message):
                 )
             except Exception as e:
                 await message.channel.send(f"⚠️ An error occurred: {e}")
+            """
 
         # DELETE all messages from a specific user ID
+        """
         elif content.lower().startswith("delete user "):
-            print(f"Received DM from {message.author}: {message.content}' delete user'")
+            print(f"Received DM from {message.author}: {message.content} 'delete user'")
             try:
                 target_id = content[12:].strip()
                 if not target_id.isdigit():
@@ -120,7 +123,7 @@ async def on_message(message):
                     f"✅ Deleted `{deleted_count}` messages from user ID `{target_id}`."
                 )
             except Exception as e:
-                await message.channel.send(f"⚠️ An error occurred: {e}")
+                await message.channel.send(f"⚠️ An error occurred: {e}")"""
 
 
 
