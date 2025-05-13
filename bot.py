@@ -35,11 +35,11 @@ async def on_message(message):
 
     # Only act on DMs from the owner
     if message.guild is None and message.author.id == YOUR_USER_ID:
-        print(f"Received DM from {message.author}: {message.content} 'delete'")
         content = message.content.strip()
 
         # DELETE all messages in DMs with the owner
-        if content.lower() == "delete":
+        if content.lower() == "delete all":
+            print(f"Received DM from {message.author}: {message.content} 'delete all'")
             try:
                 dm_channel = message.channel
                 deleted_count = 0
