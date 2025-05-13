@@ -31,11 +31,14 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    await bot.process_commands(message)  # Ensure other commands still work
+    await bot.process_commands(message)  # Ensures other commands still work
 
-    # Only respond to the owner in DMs
+    # Only act on DMs from the owner
     if message.guild is None and message.author.id == YOUR_USER_ID:
-        if message.content.strip().lower() == "delete all":
+        content = message.content.strip()
+
+        # DELETE all messages in DMs with the owner
+        if content.lower() == "delete all":
             try:
                 dm_channel = message.channel
                 deleted_count = 0
@@ -45,9 +48,45 @@ async def on_message(message):
                         await msg.delete()
                         deleted_count += 1
 
-                await dm_channel.send(f"✅ Deleted {deleted_count} of my messages.")
+                await dm_channel.send(f"✅ Deleted {deleted_count} of my DM messages.")
             except discord.Forbidden:
                 await message.channel.send("❌ I don't have permission to delete messages here.")
+            except Exception as e:
+                await message.channel.send(f"⚠️ An error occurred: {e}")
+
+        # DELETE messages with a specific word
+        elif content.lower().startswith("delete words "):
+            try:
+                target_word = content[13:].strip().lower()
+                if not target_word:
+                    await message.channel.send("⚠️ Please specify a word.")
+                    return
+
+                deleted_dm = 0
+                dm_channel = message.channel
+
+                # First, delete in DM history
+                async for msg in dm_channel.history(limit=None):
+                    if msg.author == bot.user and target_word in msg.content.lower():
+                        await msg.delete()
+                        deleted_dm += 1
+
+                # Then delete in server messages
+                deleted_server = 0
+                for guild in bot.guilds:
+                    for channel in guild.text_channels:
+                        if channel.permissions_for(guild.me).read_message_history and channel.permissions_for(guild.me).manage_messages:
+                            try:
+                                async for msg in channel.history(limit=None):
+                                    if msg.author == bot.user and target_word in msg.content.lower():
+                                        await msg.delete()
+                                        deleted_server += 1
+                            except discord.Forbidden:
+                                continue  # skip channels bot can't access
+
+                await dm_channel.send(
+                    f"✅ Deleted `{deleted_dm}` messages in DMs and `{deleted_server}` messages in servers containing the word: `{target_word}`."
+                )
             except Exception as e:
                 await message.channel.send(f"⚠️ An error occurred: {e}")
 
