@@ -35,7 +35,7 @@ async def on_message(message):
 
     # Only act on DMs from the owner
     if message.guild is None and message.author.id == YOUR_USER_ID:
-        print(f"Received DM from {message.author}: {message.content}")
+        print(f"Received DM from {message.author}: {message.content} 'delete'")
         content = message.content.strip()
 
         # DELETE all messages in DMs with the owner
@@ -57,7 +57,7 @@ async def on_message(message):
 
         # DELETE messages with a specific word
         elif content.lower().startswith("delete words "):
-            print(f"Received DM from {message.author}: {message.content}")
+            print(f"Received DM from {message.author}: {message.content} 'delete words'")
             try:
                 target_word = content[13:].strip().lower()
                 if not target_word:
@@ -94,7 +94,7 @@ async def on_message(message):
 
         # DELETE all messages from a specific user ID
         elif content.lower().startswith("delete user "):
-            print(f"Received DM from {message.author}: {message.content}")
+            print(f"Received DM from {message.author}: {message.content}' delete user'")
             try:
                 target_id = content[12:].strip()
                 if not target_id.isdigit():
