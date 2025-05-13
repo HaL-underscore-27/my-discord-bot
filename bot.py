@@ -15,6 +15,7 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+
 # Ban tracking settings
 time_frame_blabla = 10  # minutes
 ban_log = defaultdict(list)
