@@ -38,7 +38,7 @@ async def on_message(message):
         content = message.content.strip()
 
         # DELETE all messages in DMs with the owner
-        if content.lower() == "delete all":
+        if content.lower() == "delete":
             try:
                 dm_channel = message.channel
                 deleted_count = 0
