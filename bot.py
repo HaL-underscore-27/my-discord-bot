@@ -55,7 +55,37 @@ async def on_message(message):
             except Exception as e:
                 await message.channel.send(f"⚠️ An error occurred: {e}")
 
-        # DELETE messages with a specific word
+        # DELETE all messages from a specific user ID
+        
+        elif content.lower().startswith("delete user "):
+            print(f"Received DM from {message.author}: {message.content} 'delete user'")
+            try:
+                target_id = content[12:].strip()
+                if not target_id.isdigit():
+                    await message.channel.send("⚠️ Please provide a valid user ID.")
+                    return
+                target_id = int(target_id)
+
+                deleted_count = 0
+                for guild in bot.guilds:
+                    for channel in guild.text_channels:
+                        if channel.permissions_for(guild.me).read_message_history and channel.permissions_for(guild.me).manage_messages:
+                            try:
+                                async for msg in channel.history(limit=None):
+                                    if msg.author.id == target_id:
+                                        await msg.delete()
+                                        deleted_count += 1
+                            except discord.Forbidden:
+                                continue
+                            except discord.HTTPException:
+                                continue
+
+                await message.channel.send(
+                    f"✅ Deleted `{deleted_count}` messages from user ID `{target_id}`."
+                )
+            except Exception as e:
+                await message.channel.send(f"⚠️ An error occurred: {e}")
+        # DELETE messages with a specific word 
         """
         elif content.lower().startswith("delete words "):
             print(f"Received DM from {message.author}: {message.content} 'delete words'")
@@ -92,39 +122,7 @@ async def on_message(message):
                 )
             except Exception as e:
                 await message.channel.send(f"⚠️ An error occurred: {e}")
-            """
-
-        # DELETE all messages from a specific user ID
         """
-        elif content.lower().startswith("delete user "):
-            print(f"Received DM from {message.author}: {message.content} 'delete user'")
-            try:
-                target_id = content[12:].strip()
-                if not target_id.isdigit():
-                    await message.channel.send("⚠️ Please provide a valid user ID.")
-                    return
-                target_id = int(target_id)
-
-                deleted_count = 0
-                for guild in bot.guilds:
-                    for channel in guild.text_channels:
-                        if channel.permissions_for(guild.me).read_message_history and channel.permissions_for(guild.me).manage_messages:
-                            try:
-                                async for msg in channel.history(limit=None):
-                                    if msg.author.id == target_id:
-                                        await msg.delete()
-                                        deleted_count += 1
-                            except discord.Forbidden:
-                                continue
-                            except discord.HTTPException:
-                                continue
-
-                await message.channel.send(
-                    f"✅ Deleted `{deleted_count}` messages from user ID `{target_id}`."
-                )
-            except Exception as e:
-                await message.channel.send(f"⚠️ An error occurred: {e}")"""
-
 
 
 @bot.event
