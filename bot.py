@@ -29,6 +29,28 @@ ALLOWED_SERVER = int(os.getenv("ALLOWED_SERVER"))
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
 
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)  # Ensure other commands still work
+
+    # Only respond to the owner in DMs
+    if message.guild is None and message.author.id == YOUR_USER_ID:
+        if message.content.strip().lower() == "delete all":
+            try:
+                dm_channel = message.channel
+                deleted_count = 0
+
+                async for msg in dm_channel.history(limit=None):
+                    if msg.author == bot.user:
+                        await msg.delete()
+                        deleted_count += 1
+
+                await dm_channel.send(f"✅ Deleted {deleted_count} of my messages.")
+            except discord.Forbidden:
+                await message.channel.send("❌ I don't have permission to delete messages here.")
+            except Exception as e:
+                await message.channel.send(f"⚠️ An error occurred: {e}")
+
 
 @bot.event
 async def on_member_ban(guild, user):
@@ -87,7 +109,4 @@ async def on_member_ban(guild, user):
                             print(
                                 f"❌ Failed to remove roles from {banner} — missing permissions."
                             )
-
-
-#keep_alive()
 bot.run(TOKEN)
