@@ -27,7 +27,7 @@ TIME_WINDOW = timedelta(minutes=time_frame_blabla)
 ban_log = defaultdict(list)
 banned_users_by_banner = defaultdict(list)
 
-@tasks.loop(hours=120)
+@tasks.loop(minutes=120)
 async def bump_task():
     channel = bot.get_channel(BUMP_CHANNEL_ID)
     if channel:
