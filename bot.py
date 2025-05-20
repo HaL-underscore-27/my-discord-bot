@@ -50,7 +50,7 @@ async def on_ready():
     channel = bot.get_channel(BUMP_CHANNEL_ID)
     if channel:
         try:
-            await channel.send("test message")
+            await channel.send("I got updated by HaL. Beware...")
             print(f"✅ Sent initial test message in #{channel.name}")
         except Exception as e:
             print(f"⚠️ Failed to send initial test message: {e}")
