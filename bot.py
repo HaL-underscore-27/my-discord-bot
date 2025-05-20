@@ -32,7 +32,7 @@ async def bump_task():
     channel = bot.get_channel(BUMP_CHANNEL_ID)
     if channel:
         try:
-            await channel.send("test message")
+            await channel.send("/bump")
             print(f"✅ Bump message sent in #{channel.name}")
         except Exception as e:
             print(f"⚠️ Failed to send bump: {e}")
