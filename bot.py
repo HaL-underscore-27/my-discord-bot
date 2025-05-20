@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
+from discord.ext import tasks
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -15,6 +16,26 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+BUMP_CHANNEL_ID = int(os.getenv("BUMP_CHANNEL_ID"))
+
+@tasks.loop(minutes=130)  # 2 hours and 10 minutes
+async def bump_task():
+    await bot.wait_until_ready()
+    channel = bot.get_channel(BUMP_CHANNEL_ID)
+    if channel:
+        try:
+            await channel.send("/bump")
+            print(f"✅ Bump command sent in #{channel.name}")
+        except Exception as e:
+            print(f"⚠️ Failed to send bump: {e}")
+    else:
+        print("❌ Bump channel not found. Check BUMP_CHANNEL_ID.")
+
+@bot.event
+async def on_ready():
+    print(f"✅ Logged in as {bot.user}")
+    if not bump_task.is_running():
+        bump_task.start()
 
 # Ban tracking settings
 time_frame_blabla = 10  # minutes
