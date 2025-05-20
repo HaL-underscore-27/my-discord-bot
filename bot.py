@@ -27,17 +27,18 @@ TIME_WINDOW = timedelta(minutes=time_frame_blabla)
 ban_log = defaultdict(list)
 banned_users_by_banner = defaultdict(list)
 
-@tasks.loop(minutes=1)
+@tasks.loop(hours=120)
 async def bump_task():
     channel = bot.get_channel(BUMP_CHANNEL_ID)
     if channel:
         try:
-            await channel.send("/bump")
-            print(f"✅ Bump message sent in #{channel.name}")
+            await channel.send(f"It's time to **/bump** the server!")
+            print(f"✅ Bump reminder sent in #{channel.name}")
         except Exception as e:
-            print(f"⚠️ Failed to send bump: {e}")
+            print(f"⚠️ Failed to send bump reminder: {e}")
     else:
         print("❌ Bump channel not found.")
+
 
 @bot.event
 async def on_ready():
