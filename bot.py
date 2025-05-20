@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 BUMP_CHANNEL_ID = int(os.getenv("BUMP_CHANNEL_ID"))
 
-@tasks.loop(minutes=130)  # 2 hours and 10 minutes
+@tasks.loop(seconds=10)  # 2 hours and 10 minutes
 async def bump_task():
     channel = bot.get_channel(BUMP_CHANNEL_ID)
     if channel:
