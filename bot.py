@@ -14,6 +14,7 @@ intents.bans = True
 intents.guilds = True
 intents.members = True
 intents.messages = True
+intents.message_content = True  # ✅ Add this
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
