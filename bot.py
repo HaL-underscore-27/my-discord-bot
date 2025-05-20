@@ -13,6 +13,7 @@ intents = discord.Intents.default()
 intents.bans = True
 intents.guilds = True
 intents.members = True
+intents.messages = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
