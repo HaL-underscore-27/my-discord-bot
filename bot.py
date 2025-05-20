@@ -18,12 +18,12 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 BUMP_CHANNEL_ID = int(os.getenv("BUMP_CHANNEL_ID"))
 
-@tasks.loop(seconds=10)  # 2 hours and 10 minutes
+@tasks.loop(minutes=1)  # 2 hours and 10 minutes
 async def bump_task():
     channel = bot.get_channel(BUMP_CHANNEL_ID)
     if channel:
         try:
-            await channel.send("/bump")
+            await channel.send("test message")
             print(f"✅ Bump command sent in #{channel.name}")
         except Exception as e:
             print(f"⚠️ Failed to send bump: {e}")
