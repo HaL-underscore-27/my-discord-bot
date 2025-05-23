@@ -1,13 +1,14 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
+import asyncio
 import os
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-YOUR_USER_ID = int(os.getenv("OWNER_ID"))  # Your Discord user ID
+YOUR_USER_ID = int(os.getenv("OWNER_ID"))
 BUMP_CHANNEL_ID = int(os.getenv("BUMP_CHANNEL_ID"))
 ALLOWED_SERVER = int(os.getenv("ALLOWED_SERVER"))
 
@@ -16,7 +17,7 @@ intents.bans = True
 intents.guilds = True
 intents.members = True
 intents.messages = True
-intents.message_content = True  # REQUIRED to read messages
+intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -27,26 +28,15 @@ TIME_WINDOW = timedelta(minutes=time_frame_blabla)
 ban_log = defaultdict(list)
 banned_users_by_banner = defaultdict(list)
 
-@tasks.loop(minutes=120)
-async def bump_task():
-    channel = bot.get_channel(BUMP_CHANNEL_ID)
-    if channel:
-        try:
-            await channel.send(f"It's time to **/bump** the server!")
-            print(f"✅ Bump reminder sent in #{channel.name}")
-        except Exception as e:
-            print(f"⚠️ Failed to send bump reminder: {e}")
-    else:
-        print("❌ Bump channel not found.")
-
+# Bump timer tracking
+last_bump_time = None
+BUMP_COOLDOWN = timedelta(minutes=120)
 
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
-    if not bump_task.is_running():
-        bump_task.start()
 
-    # Manual test message once on startup
+    # Send startup message
     channel = bot.get_channel(BUMP_CHANNEL_ID)
     if channel:
         try:
@@ -57,8 +47,23 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    global last_bump_time
     await bot.process_commands(message)
 
+    if message.guild and message.channel.id == BUMP_CHANNEL_ID and message.content.strip().lower() == "/bump":
+        now = datetime.now(timezone.utc)
+        if not last_bump_time or (now - last_bump_time) >= BUMP_COOLDOWN:
+            last_bump_time = now
+            try:
+                await message.channel.send("✅ Bump registered. Next reminder in 120 minutes.")
+                await asyncio.sleep(BUMP_COOLDOWN.total_seconds())
+                await message.channel.send("⏰ It's time to **/bump** the server again!")
+            except Exception as e:
+                print(f"⚠️ Failed during bump timer: {e}")
+        else:
+            print("⏳ Bump ignored. Timer is still active.")
+
+    # DM commands for message deletion
     if message.guild is None and message.author.id == YOUR_USER_ID:
         content = message.content.strip()
 
@@ -99,39 +104,6 @@ async def on_message(message):
                 await message.channel.send(f"✅ Deleted `{deleted_count}` messages from user ID `{target_id}`.")
             except Exception as e:
                 await message.channel.send(f"⚠️ An error occurred: {e}")
-
-        """
-        elif content.lower().startswith("delete words "):
-            try:
-                target_word = content[13:].strip().lower()
-                if not target_word:
-                    await message.channel.send("⚠️ Please specify a word.")
-                    return
-
-                deleted_dm = 0
-                dm_channel = message.channel
-
-                async for msg in dm_channel.history(limit=None):
-                    if msg.author == bot.user and target_word in msg.content.lower():
-                        await msg.delete()
-                        deleted_dm += 1
-
-                deleted_server = 0
-                for guild in bot.guilds:
-                    for channel in guild.text_channels:
-                        if channel.permissions_for(guild.me).read_message_history and channel.permissions_for(guild.me).manage_messages:
-                            try:
-                                async for msg in channel.history(limit=None):
-                                    if msg.author == bot.user and target_word in msg.content.lower():
-                                        await msg.delete()
-                                        deleted_server += 1
-                            except discord.Forbidden:
-                                continue
-
-                await dm_channel.send(f"✅ Deleted `{deleted_dm}` messages in DMs and `{deleted_server}` messages in servers containing the word: `{target_word}`.")
-            except Exception as e:
-                await message.channel.send(f"⚠️ An error occurred: {e}")
-        """
 
 @bot.event
 async def on_member_ban(guild, user):
