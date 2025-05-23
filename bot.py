@@ -51,6 +51,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
     if message.guild and message.channel.id == BUMP_CHANNEL_ID and message.content.strip().lower() == "/bump":
+        print(f"✅ Bump command received in #{message.channel.name} from {message.author.name}")
         now = datetime.now(timezone.utc)
         if not last_bump_time or (now - last_bump_time) >= BUMP_COOLDOWN:
             last_bump_time = now
