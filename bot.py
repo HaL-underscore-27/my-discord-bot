@@ -11,7 +11,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 YOUR_USER_ID = int(os.getenv("OWNER_ID"))
 BUMP_CHANNEL_ID = int(os.getenv("BUMP_CHANNEL_ID"))
 ALLOWED_SERVER = int(os.getenv("ALLOWED_SERVER"))
-
+DISBOARD_BOT_ID = 302050872383242240  # Official Disboard bot ID
 intents = discord.Intents.default()
 intents.bans = True
 intents.guilds = True
@@ -45,8 +45,6 @@ async def on_ready():
         except Exception as e:
             print(f"⚠️ Failed to send initial test message: {e}")
 
-DISBOARD_BOT_ID = 302050872383242240  # Official Disboard bot ID
-
 @bot.event
 async def on_message(message):
     global last_bump_time
@@ -54,11 +52,17 @@ async def on_message(message):
 
     # ✅ Detect Disboard bump confirmation
     if (
-        message.guild and
-        message.channel.id == BUMP_CHANNEL_ID and
-        message.author.id == DISBOARD_BOT_ID and
-        "bump done!" in message.content.lower()
-    ):
+    message.guild and
+    message.channel.id == BUMP_CHANNEL_ID and
+    message.author.id == DISBOARD_BOT_ID and
+    (
+        "bump done!" in message.content.lower() or
+        any("bump done!" in embed.description.lower() for embed in message.embeds if embed.description)
+    )
+):
+        if last_bump_time and (datetime.now(timezone.utc) - last_bump_time) < BUMP_COOLDOWN:
+            print("⚠️ Bump command used too soon. Ignoring.")
+            return
         print(f"✅ Disboard bump confirmed at {datetime.now(timezone.utc)}")
         last_bump_time = datetime.now(timezone.utc)
 
