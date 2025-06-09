@@ -52,17 +52,14 @@ async def on_message(message):
 
     # ✅ Detect Disboard bump confirmation
     if (
-    message.guild and
-    message.channel.id == BUMP_CHANNEL_ID and
-    message.author.id == DISBOARD_BOT_ID and
-    (
-        "bump done!" in message.content.lower() or
-        any("bump done!" in embed.description.lower() for embed in message.embeds if embed.description)
-    )
-):
-        if last_bump_time and (datetime.now(timezone.utc) - last_bump_time) < BUMP_COOLDOWN:
-            print("⚠️ Bump command used too soon. Ignoring.")
-            return
+        message.guild and
+        message.channel.id == BUMP_CHANNEL_ID and
+        message.author.id == DISBOARD_BOT_ID and
+        (
+            "bump done!" in message.content.lower() or
+            any("bump done!" in embed.description.lower() for embed in message.embeds if embed.description)
+        )
+    ):
         print(f"✅ Disboard bump confirmed at {datetime.now(timezone.utc)}")
         last_bump_time = datetime.now(timezone.utc)
 
@@ -72,6 +69,7 @@ async def on_message(message):
             await message.channel.send("⏰ It's time to **/bump** the server again!")
         except Exception as e:
             print(f"⚠️ Failed during bump reminder: {e}")
+
 
 
     # DM commands for message deletion
