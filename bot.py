@@ -45,24 +45,30 @@ async def on_ready():
         except Exception as e:
             print(f"⚠️ Failed to send initial test message: {e}")
 
+DISBOARD_BOT_ID = 302050872383242240  # Official Disboard bot ID
+
 @bot.event
 async def on_message(message):
     global last_bump_time
     await bot.process_commands(message)
 
-    if message.guild and message.channel.id == BUMP_CHANNEL_ID and message.content.strip().lower() == "/bump":
-        print(f"✅ Bump command received in #{message.channel.name} from {message.author.name}")
-        now = datetime.now(timezone.utc)
-        if not last_bump_time or (now - last_bump_time) >= BUMP_COOLDOWN:
-            last_bump_time = now
-            try:
-                await message.channel.send("✅ Bump registered. Next reminder in 120 minutes.")
-                await asyncio.sleep(BUMP_COOLDOWN.total_seconds())
-                await message.channel.send("⏰ It's time to **/bump** the server again!")
-            except Exception as e:
-                print(f"⚠️ Failed during bump timer: {e}")
-        else:
-            print("⏳ Bump ignored. Timer is still active.")
+    # ✅ Detect Disboard bump confirmation
+    if (
+        message.guild and
+        message.channel.id == BUMP_CHANNEL_ID and
+        message.author.id == DISBOARD_BOT_ID and
+        "bump done!" in message.content.lower()
+    ):
+        print(f"✅ Disboard bump confirmed at {datetime.now(timezone.utc)}")
+        last_bump_time = datetime.now(timezone.utc)
+
+        try:
+            await message.channel.send("✅ Bump registered. Next reminder in 2 hours.")
+            await asyncio.sleep(BUMP_COOLDOWN.total_seconds())
+            await message.channel.send("⏰ It's time to **/bump** the server again!")
+        except Exception as e:
+            print(f"⚠️ Failed during bump reminder: {e}")
+
 
     # DM commands for message deletion
     if message.guild is None and message.author.id == YOUR_USER_ID:
